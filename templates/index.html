@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Factory MAS Dashboard</title>
+  <script>
+    function updateDashboard() {
+      // Update agent status
+      fetch('/api/status')
+        .then(response => response.json())
+        .then(status => {
+          document.getElementById('status').innerHTML = 
+            "<pre>" + JSON.stringify(status, null, 2) + "</pre>";
+        });
+      // Append new logs to the dashboard
+      fetch('/api/logs')
+        .then(response => response.json())
+        .then(logs => {
+          let logsHtml = "";
+          logs.forEach(log => {
+            logsHtml += `<p>${log[0]}: ${log[1]}</p>`;
+          });
+          document.getElementById('logs').innerHTML += logsHtml;
+        });
+    }
+    // Poll the endpoints every second for updates
+    setInterval(updateDashboard, 1000);
+  </script>
+</head>
+<body>
+  <h1>Smart Factory MAS Dashboard</h1>
+  <h2>Agent Status</h2>
+  <div id="status"></div>
+  <h2>Communication Logs</h2>
+  <div id="logs"></div>
+</body>
+</html>
