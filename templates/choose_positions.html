@@ -1,0 +1,18 @@
+<!-- templates/choose_positions.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Choose Agent Positions</title>
+</head>
+<body>
+  <h1>Business Idea: {{ business_idea }}</h1>
+  <p><strong>AI Cofounder Suggestion:</strong> {{ cofounder_response }}</p>
+  <form method="POST" action="/recruit">
+    <input type="hidden" name="business_idea" value="{{ business_idea }}">
+    <label for="positions">Enter desired agent positions (comma separated):</label>
+    <input type="text" id="positions" name="positions" required>
+    <button type="submit">Recruit Agents</button>
+  </form>
+</body>
+</html>
