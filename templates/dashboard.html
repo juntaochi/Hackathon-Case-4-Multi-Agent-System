@@ -1,0 +1,136 @@
+<!-- templates/dashboard.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Company Dashboard</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    /* Basic styling for the persistent chat box */
+    #cofounder-chat {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 300px;
+      max-height: 400px;
+      background-color: #f1f1f1;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      font-size: 14px;
+    }
+    #chat-history {
+      height: 250px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      background-color: #fff;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    #chat-form input[type="text"] {
+      width: 80%;
+      padding: 5px;
+    }
+    #chat-form button {
+      padding: 5px 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Company Dashboard</h1>
+  
+  <h2>Agents</h2>
+  <ul>
+    {% for agent in agents.values() %}
+      <li>
+        <strong>{{ agent.position }}</strong> (ID: {{ agent.id }})
+        <ul>
+          {% for mail in agent.inmails %}
+            <li>
+              <strong>From:</strong> {{ mail.sender }} | 
+              <strong>Subject:</strong> {{ mail.subject }}<br>
+              <em>{{ mail.body }}</em>
+            </li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h2>Tasks</h2>
+  <div id="tasks">
+    {% for task in tasks.values() %}
+      <div id="{{ task.id }}">
+        <p>
+          <strong>{{ task.description }}</strong> – Assigned to: {{ task.assigned_to }} – Completed: {{ task.completed }}
+        </p>
+        {% if not task.completed %}
+          <button onclick="completeTask('{{ task.id }}')">Mark as Complete</button>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <h2>Send InMail</h2>
+  <form id="inmailForm">
+    <label for="sender">Sender (your agent position):</label>
+    <input type="text" id="sender" name="sender" required>
+    <br>
+    <label for="recipient">Recipient (agent position):</label>
+    <input type="text" id="recipient" name="recipient" required>
+    <br>
+    <label for="subject">Subject:</label>
+    <input type="text" id="subject" name="subject" required>
+    <br>
+    <label for="body">Body:</label>
+    <textarea id="body" name="body" required></textarea>
+    <br>
+    <button type="submit">Send InMail</button>
+  </form>
+
+  <script>
+    // Handle inmail sending
+    $("#inmailForm").submit(function(e) {
+      e.preventDefault();
+      $.post("/send_inmail", $(this).serialize(), function(data) {
+        alert("InMail sent!");
+        location.reload();
+      });
+    });
+
+    // Mark task as complete
+    function completeTask(task_id) {
+      $.post("/complete_task", {task_id: task_id}, function(data) {
+        alert("Task completed!");
+        location.reload();
+      });
+    }
+  </script>
+
+  <!-- Persistent Chat Box with AI Cofounder -->
+  <div id="cofounder-chat">
+    <div id="chat-history"></div>
+    <form id="chat-form">
+      <input type="text" id="chat-input" name="message" placeholder="Type your message..." autocomplete="off" required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    // Handle chat messages with the AI cofounder
+    $("#chat-form").submit(function(e) {
+      e.preventDefault();
+      var message = $("#chat-input").val();
+      // Append the user's message to the chat history
+      $("#chat-history").append("<p><strong>You:</strong> " + message + "</p>");
+      $("#chat-input").val(""); // clear the input
+      $.post("/chat_cofounder", {message: message}, function(data) {
+        $("#chat-history").append("<p><strong>Cofounder:</strong> " + data.response + "</p>");
+        // Auto-scroll chat history to the bottom
+        $("#chat-history").scrollTop($("#chat-history")[0].scrollHeight);
+      });
+    });
+  </script>
+</body>
+</html>
